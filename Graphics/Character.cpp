@@ -26,8 +26,8 @@ void Character::SetDestination(double dx, double dy)
 	double length;
 	Target->SetRow(dx);
 	Target->SetColumn(dy);
-	dirx = Target->GetRow() - Position->GetRow();
-	diry = Target->GetColumn() - Position->GetColumn();
+	dirx = Target->GetRow() - (*Position)->GetRow();
+	diry = Target->GetColumn() - (*Position)->GetColumn();
 	// normalize vector dir
 	length = sqrt(dirx * dirx + diry * diry);
 	dirx /= length;

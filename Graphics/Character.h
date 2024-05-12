@@ -16,7 +16,7 @@ class State;
 class Character
 {
 private:
-	Cell* Position;
+	Cell** Position;
 	
 	Cell* Target;
 	double dirx, diry;
@@ -44,7 +44,7 @@ public:
 	//Getters
 	int		GetPacmanPoints() { return pacmanPoints; }
 	int		IsSafeDistance() { return safeDistance; }
-	Cell*   getPosition() { return Position; }
+	Cell*   getPosition() { return *Position; }
 	Cell*   getTarget() { return Target; }
 	bool	GetIsPacman() { return IsPacman; }
 	int		GetPacmanScore() { return pacmanScore; }
@@ -61,7 +61,7 @@ public:
 	void SetIsMoving(bool value) { isMoving = value; }
 	void SetDestination(double dx, double dy);
 	void SetIsPacman(bool isPacman) { this->IsPacman = isPacman; };
-	void SetPosition(Cell* Position) { this->Position = Position; }
+	void SetPosition(Cell* Position) { this->Position = &Position; }
 	void SetTarget(Cell* Target) { this->Target = Target; }
 
 	// STATE - setters
