@@ -7,11 +7,8 @@
 #include <vector>
 
 #include "glut.h"
-#include "Maze.h"
 #include "Character.h"
 
-#include "CellComparator.h"
-#include "SafeDistanceComparator.h"
 
 
 const int PacmanFightDelay = 2;

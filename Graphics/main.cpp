@@ -13,6 +13,8 @@ Game* game;
 void init()
 {
 	srand(time(NULL));
+
+	game = new Game();
 	
 	//srand(static_cast<unsigned int>(time(NULL)));  // Explicit cast to unsigned int
 	glClearColor(0, 0.5, 0.8, 0);// color of window background
@@ -36,7 +38,7 @@ void idle()
 void menu(int choice)
 {
 
-	switch (choice)
+	/*switch (choice)
 	{
 	case 0:
 		if (!game->IsGhostWon() && !game->IsPacmanWon())
@@ -60,7 +62,7 @@ void menu(int choice)
 		display();
 		break;
 
-	}
+	}*/
 	
 }
 
@@ -82,7 +84,7 @@ int main(int argc, char* argv[])
 
 	glutDisplayFunc(display);
 	glutIdleFunc(idle);
-	game = new Game();
+	
 	init();
 
 	glutMainLoop();

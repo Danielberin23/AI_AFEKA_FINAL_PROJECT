@@ -13,7 +13,10 @@ const int FOOD = 7;
 const int GHOST_1 = 8;
 const int GHOST_2 = 9;
 const int GHOST_3 = 10;
-
+const int			WIDTH = 1000;
+const int			HEIGHT = 1000;
+const int			NUM_OF_GHOSTS = 3;
+const int			NUM_OF_FOOD = 4;
 
 class Cell {
 private:

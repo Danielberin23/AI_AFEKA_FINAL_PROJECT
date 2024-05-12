@@ -4,7 +4,7 @@
 
 
 
-Maze::Maze() :fairGame(true) {
+Maze::Maze() {
 	InitMaze();
 
 	while (IsFairGame())
@@ -58,7 +58,7 @@ void Maze::InitMaze()
 		j = rand() % MSZ;
 	} while (MAZE[i][j]->GetIdentity() != SPACE);
 	MAZE[i][j]->SetIdentity(PACMAN);
-	pacman=MAZE[i][j];
+	pacman=new Cell(MAZE[i][j]);
 	pacmanVector.push_back(pacman);//cell* pacman
 }
 

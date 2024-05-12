@@ -19,12 +19,12 @@ Cell::Cell(Cell* other)
 		SetParent(new Cell(other->GetParent()));
 }
 
-Cell::Cell(int row, int col)
+Cell::Cell(int row, int column)
 {
 	this->row = row;
-	this->column = col;
-
-
+	this->column = column;
+	SetIdentity(SPACE);
+    SetParent(nullptr);
 }
 
 

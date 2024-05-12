@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Cell.h"
 #include "State.h"
 #include "Maze.h"
 
@@ -8,10 +7,7 @@
 using namespace		std;
 
 
-const int			WIDTH = 800;
-const int			HEIGHT = 600;
-const int			NUM_OF_GHOSTS = 3;
-const int			NUM_OF_FOOD = 4;
+
 const double		STEP_PENALTY = 0.4;
 const double		CLOSE_DISTANCE = 1.4;
 const int			DEPTH = 5;// BFS DEPTH
@@ -41,7 +37,7 @@ public:
 	
 	//bool fairGame = false;
 	// Constructor
-	Character(bool IsPacman);
+	Character(bool IsPacman,Cell* Position);
 	//Destructor
 	~Character();
 
@@ -77,17 +73,16 @@ public:
 	void	SetCurrentState(State* ps) { pCurrentState = ps; }
 	double	Distance(Cell* n1, Cell* n2);
 	bool	isNearFood();//not used
-	int		StartMove(Cell* pCurrPlayer, Character* pCh, int distance);
 	
 	
 	bool	PlayPacman(Maze* gameInstance);
-	void	PlayGhost(Maze* gameInstance, Cell* ghostTarget, Cell* pacman, int ghostNumber);
+	void	PlayGhost(Maze* gameInstance,int ghostNumber);
 
 	void	MovePacman(Maze* gameInstance,Cell* target);
 	void	MoveGhost(int ghostNumber, int ghostValue);
 	std::vector<Cell*>	getPacmanNeighbors(Cell* cell, const Maze &maze);
 
 	double	assertSafety(Maze* gameInstance, Cell* coinCell);
-	bool	CoinsRisk(Maze* gameInstance);
+	bool	CoinsRisk(Maze* gameInstance); 
 
 };

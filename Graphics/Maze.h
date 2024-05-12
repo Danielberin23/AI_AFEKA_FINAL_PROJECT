@@ -33,7 +33,7 @@ public:
     Cell* MAZE[MSZ][MSZ] = { 0 }; // Initialize the maze with SPACES 
     
     //check if food can be reached
-    bool fairGame;
+    bool fairGame=true;
 
 
     Maze();

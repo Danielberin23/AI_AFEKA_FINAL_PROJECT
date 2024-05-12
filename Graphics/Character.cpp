@@ -8,8 +8,9 @@ using namespace std;
 
 Character::~Character() {}
 
-Character::Character(bool IsPacman)
+Character::Character(bool IsPacman, Cell* Position)
 {
+	this->SetPosition(Position);
 	this->SetIsPacman(IsPacman);
 	//Pacman is eating food and Ghost is chasing pacman 
 	if (IsPacman)
@@ -62,6 +63,7 @@ bool Character::PlayPacman(Maze* gameInstance)
 	if(CoinsRisk(gameInstance))
 		return true;
 	pacmanTarget = gameInstance->safeDistancePQ.top();
+	//if Pacman is moving target is food, change the target to the safest one
 	if (isMoving)
 	{
 		if (previousTarget != nullptr)
@@ -94,13 +96,13 @@ bool Character::PlayPacman(Maze* gameInstance)
 		while(!gameInstance->safeDistancePQ.empty())
 			gameInstance->safeDistancePQ.pop();
 	
-
+		//pacman didn't won yet
 		return false;
 }
-void Character::PlayGhost(Maze* mazeInstance, Cell* ghostTarget,Cell* pacman, int ghostNumber)
+void Character::PlayGhost(Maze* mazeInstance, int ghostNumber)
 {
 	int ghostValue;
-
+	//PICK WHICH GHOST IS THE PLAYER
 	if (ghostNumber == 0)
 		ghostValue = GHOST_1;
 	else if (ghostNumber == 1)
@@ -109,23 +111,21 @@ void Character::PlayGhost(Maze* mazeInstance, Cell* ghostTarget,Cell* pacman, in
 		ghostValue = GHOST_3;
 
 	
-	double distance = Distance(ghostTarget, pacman);
+	double distance = Distance(mazeInstance->pacman, mazeInstance->ghosts[ghostNumber]);
 
 
 	// if ghost is near the pacman we first check number of ghosts
-	// if there are 3 ghost we have to create transition to attacking state
-	// if there are 2 or less ghosts, ghosts won
 	if (distance >= 1 && distance < CLOSE_DISTANCE)
 	{
 		this->GetCurrentState()->Transition(this);//move to attack mode
 	}
 	else
 	{
-		ghostTarget->SetH(distance);
+		/*ghostTarget->SetH(distance);
 		mazeInstance->ghostsPQ.push(ghostTarget);
 		MoveGhost(ghostNumber, ghostValue);
 		while (!mazeInstance->ghostsPQ.empty())
-			mazeInstance->ghostsPQ.pop();
+			mazeInstance->ghostsPQ.pop();*/
 	}
 
 }
@@ -189,14 +189,16 @@ void Character::MovePacman(Maze* gameInstance, Cell* target)
 	if (!queue.empty() && isMoving) {
 		Cell* lastCell = queue.back();
 		this->SetPosition(lastCell);
+		gameInstance->pacman = gameInstance->MAZE[lastCell->GetRow()][lastCell->GetColumn()];
 		gameInstance->MAZE[lastCell->GetRow()][lastCell->GetColumn()]->SetIdentity(PACMAN);
 		//paint previous cell space
 		gameInstance->MAZE[startCell->GetRow()][startCell->GetColumn()]->SetIdentity(SPACE);
 	}
+	//MOVE PACMAN TO THE POSITION NEAR HIM THAT IS LESS RISKY FROM GHOST
 	if (isChasing)
 	{
 		double newRisk = 0;
-		int xSafe, ySafe;
+		int xSafe=0, ySafe=0;
 		Cell* ghostCell = queue.front();
 		std::vector<Cell*> neighbors = getPacmanNeighbors(this->getPosition(), *gameInstance);
 		double risk = this->assertSafety(gameInstance,this->getPosition());
@@ -210,6 +212,7 @@ void Character::MovePacman(Maze* gameInstance, Cell* target)
 			}
 		}
 		this->SetPosition(gameInstance->MAZE[xSafe][ySafe]);
+		gameInstance->pacman = gameInstance->MAZE[xSafe][ySafe];
 		gameInstance->MAZE[xSafe][ySafe]->SetIdentity(PACMAN);
 		//paint previous cell space
 		gameInstance->MAZE[this->getPosition()->GetRow()][this->getPosition()->GetColumn()]->SetIdentity(SPACE);

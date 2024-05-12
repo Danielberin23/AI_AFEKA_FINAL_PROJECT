@@ -8,10 +8,10 @@ Game::Game()
 	BoardInstance = new Maze();
 
 	bool isGhost = false, isPacman = true;
-	Pacman = new Character(isPacman);
+	Pacman = new Character(isPacman,BoardInstance->pacman);
 	for (int i = 0; i < NUM_OF_GHOSTS; i++)
 	{
-		Ghosts[i] = new Character(isGhost);
+		Ghosts[i] = new Character(isGhost,BoardInstance->ghosts[i]);
 	}
 
 	// Start the game
@@ -44,6 +44,6 @@ void Game::Play(Character* character)
 		this->pacmanWon = Pacman->PlayPacman(BoardInstance);
 	else
 		for (int i = 0; i < NUM_OF_GHOSTS; i++)
-			Ghosts[i]->PlayGhost(BoardInstance,Ghosts[i]->getPosition(),Pacman->getPosition(), i);
+			Ghosts[i]->PlayGhost(BoardInstance, i);
 
 }
