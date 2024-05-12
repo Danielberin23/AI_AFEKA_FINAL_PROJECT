@@ -24,9 +24,9 @@ void Maze::InitMaze()
 	{
 		for (j = 0; j < MSZ; j++)
 		{
-			MAZE[i][j] = new Cell();
-			MAZE[i][j]->SetRow(i);
-			MAZE[i][j]->SetColumn(j);
+			MAZE[i][j] = new Cell(i,j);
+			/*MAZE[i][j]->SetRow(i);
+			MAZE[i][j]->SetColumn(j);*/
 
 		}
 	}
@@ -37,8 +37,9 @@ void Maze::InitMaze()
 		MAZE[i][0]->SetIdentity(WALL);
 		MAZE[i][MSZ - 1]->SetIdentity(WALL);
 	}
-	for (i = 1; i < MSZ - 1; i++)
-		for (j = 1; j < MSZ - 1; j++)
+	for (i = 2; i < MSZ - 2; i++)
+	{
+		for (j = 2; j < MSZ - 2; j++)
 		{
 			if (i % 2 == 1) // Odd row
 			{
@@ -51,6 +52,8 @@ void Maze::InitMaze()
 					MAZE[i][j]->SetIdentity(WALL);
 			}
 		}
+	}
+
 	// mark out the pacman start cell
 	do
 	{
@@ -58,7 +61,7 @@ void Maze::InitMaze()
 		j = rand() % MSZ;
 	} while (MAZE[i][j]->GetIdentity() != SPACE);
 	MAZE[i][j]->SetIdentity(PACMAN);
-	pacman=new Cell(MAZE[i][j]);
+	pacman = MAZE[i][j];
 	pacmanVector.push_back(pacman);//cell* pacman
 }
 
@@ -74,9 +77,9 @@ void Maze::ChangeColorMaze()
 			case BLACK:
 				MAZE[i][j]->SetIdentity(SPACE);
 				break;
-			case SPACE:
-				MAZE[i][j]->SetIdentity(WALL);
-				break;
+			//case SPACE:
+			//	MAZE[i][j]->SetIdentity(WALL);
+			//	break;
 			}
 		}
 }
@@ -97,13 +100,15 @@ void Maze::AddFood()
 void Maze::AddGhosts()
 {
 	int i, j, k;
+	int identity;
 	for (k = 0; k < NUM_OF_GHOSTS; k++)
 	{
 		do
 		{
 			i = rand() % MSZ;
 			j = rand() % MSZ;
-		} while (MAZE[i][j]->GetIdentity() != SPACE);
+			identity = MAZE[i][j]->GetIdentity();
+		} while (identity != SPACE);
 		if (k == 0)
 			MAZE[i][j]->SetIdentity(GHOST_1);
 		else if (k == 1)
