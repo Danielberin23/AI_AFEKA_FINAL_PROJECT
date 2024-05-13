@@ -20,7 +20,7 @@ public:
     priority_queue<Cell*, vector<Cell*>, CellComparator> ghostsPQ;
     priority_queue<Cell*, vector<Cell*>, SafeDistanceComparator> safeDistancePQ;
 
-    vector<Cell*> pacmanVector;
+   
     vector<Cell*> blacksVector;
     vector<Cell*> graysVector;
 
