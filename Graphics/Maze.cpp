@@ -62,7 +62,7 @@ void Maze::InitMaze()
 	} while (MAZE[i][j]->GetIdentity() != SPACE);
 	MAZE[i][j]->SetIdentity(PACMAN);
 	pacman = MAZE[i][j];
-	pacmanVector.push_back(pacman);//cell* pacman
+	pacmanQueue.push(pacman);//cell* pacman
 }
 
 void Maze::ChangeColorMaze()

@@ -20,9 +20,10 @@ public:
     priority_queue<Cell*, vector<Cell*>, CellComparator> ghostsPQ;
     priority_queue<Cell*, vector<Cell*>, SafeDistanceComparator> safeDistancePQ;
 
-   
+    vector<Cell*> pacmanVector;
     vector<Cell*> blacksVector;
     vector<Cell*> graysVector;
+    queue <Cell*> pacmanQueue; // queue of gray cells
 
     vector<Cell*>::iterator graysIterator;
     vector<Cell*>::iterator blacksIterator;

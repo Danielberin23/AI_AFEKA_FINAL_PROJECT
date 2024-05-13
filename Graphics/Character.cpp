@@ -132,93 +132,40 @@ void Character::PlayGhost(Maze* mazeInstance, int ghostNumber)
 
 void Character::MovePacman(Maze* gameInstance, Cell* target)
 {
-	//pacman find food with BFS
-	queue<Cell*> queue;
-	Cell* startCell = nullptr;
+	Cell* currentCell=nullptr;
 	int row, column;
-	std::vector<std::vector<bool>> visited(MSZ, std::vector<bool>(MSZ, false));
-
-	startCell = this->getPosition();
-	queue.push(startCell);
-	visited[startCell->GetRow()][startCell->GetColumn()] = true;
+	bool go_on = true;
 	int currentDepth = 0;
-	
-
-	while (!queue.empty() && currentDepth <= DEPTH)
+	while (!gameInstance->pacmanQueue.empty()&&currentDepth<=DEPTH)
 	{
-		int levelSize = queue.size();
+		currentCell = gameInstance->pacmanQueue.front();
+		gameInstance->pacmanQueue.pop();
+		row = currentCell->GetRow();
+		column = currentCell->GetColumn();
+		if (row == target->GetRow() && column == target->GetColumn())
+			break;
+		// up
+			go_on = checkPacmanNeighbors(currentCell,gameInstance->MAZE[row + 1][column], gameInstance);
+		// down
+		if (go_on)
+			go_on = checkPacmanNeighbors(currentCell, gameInstance->MAZE[row - 1][column], gameInstance);
+		// left
+		if (go_on)
+			go_on = checkPacmanNeighbors(currentCell, gameInstance->MAZE[row][column - 1], gameInstance);
+		// right
+		if (go_on)
+			go_on = checkPacmanNeighbors(currentCell, gameInstance->MAZE[row ][column+ 1], gameInstance);
 
-		for (int i = 0; i < levelSize; i++)
-		{
-			Cell* currentCell = queue.front();
-			queue.pop();
-			if (gameInstance->IsGhost(currentCell->GetIdentity()))
-			{
-
-				//in case we find ghost
-				//transition to chase state
-				this->GetCurrentState()->Transition(this);
-				queue.push(currentCell);
-				break;
-
-			}
-			else
-			{
-				//in case we find coin
-				if (currentCell->GetColumn() == target->GetColumn() && currentCell->GetRow() == target->GetRow())
-				{	
-
-					break;
-				}
-			}
-			// Check the cells: up, down, left, right
-
-			std::vector<Cell*> neighbors = getPacmanNeighbors(currentCell, *gameInstance);
-			for (Cell* neighbor : neighbors) {
-				int x = neighbor->GetRow();
-				int y = neighbor->GetColumn();
-				if (!visited[x][y]) {
-					queue.push(neighbor);
-					visited[x][y] = true;
-				}
-
-			}
-			currentDepth++;
-		}
+		currentDepth++;
 	}
-	if (!queue.empty() && isMoving) {
-		Cell* lastCell = queue.back();
-		this->SetPosition(lastCell);
-		gameInstance->pacman = gameInstance->MAZE[lastCell->GetRow()][lastCell->GetColumn()];
-		gameInstance->MAZE[lastCell->GetRow()][lastCell->GetColumn()]->SetIdentity(PACMAN);
-		//paint previous cell space
-		gameInstance->MAZE[startCell->GetRow()][startCell->GetColumn()]->SetIdentity(SPACE);
-	}
-	//MOVE PACMAN TO THE POSITION NEAR HIM THAT IS LESS RISKY FROM GHOST
-	if (isChasing)
+	////restore path
+	while (true)
 	{
-		double newRisk = 0;
-		int xSafe=0, ySafe=0;
-		Cell* ghostCell = queue.front();
-		std::vector<Cell*> neighbors = getPacmanNeighbors(this->getPosition(), *gameInstance);
-		double risk = this->assertSafety(gameInstance,this->getPosition());
-		for (Cell* neighbor : neighbors) {
-			int x = neighbor->GetRow();
-			int y = neighbor->GetColumn();
-			newRisk = this->assertSafety(gameInstance,gameInstance->MAZE[x][y]);
-			if (newRisk < risk) {
-				xSafe = x;
-				ySafe = y;
-			}
-		}
-		this->SetPosition(gameInstance->MAZE[xSafe][ySafe]);
-		gameInstance->pacman = gameInstance->MAZE[xSafe][ySafe];
-		gameInstance->MAZE[xSafe][ySafe]->SetIdentity(PACMAN);
-		//paint previous cell space
-		gameInstance->MAZE[this->getPosition()->GetRow()][this->getPosition()->GetColumn()]->SetIdentity(SPACE);
-
+		currentCell = currentCell->GetParent();
+		if (currentCell->GetParent()->GetIdentity() == PACMAN)
+			break;
 	}
-	
+
 }
 
 
@@ -227,33 +174,16 @@ void Character::MoveGhost(int ghostNumber, int ghostValue)
 
 }
 
-std::vector<Cell*> Character::getPacmanNeighbors(Cell* cell, const Maze& maze)
+bool Character::checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze* maze)
 {
-	std::vector<Cell*> neighbors;
-	int x = cell->GetRow();
-	int y = cell->GetColumn();
-
-	// Check left neighbor
-	if (x > 0 && !(maze.MAZE[y][x - 1]->GetIdentity() == WALL)) {
-		neighbors.push_back(maze.MAZE[y][x - 1]);
+	if (maze->MAZE[cell->GetRow()][cell->GetColumn()]->GetIdentity() == SPACE)
+	{
+		cell->SetParent(previousCell);
+		maze->pacmanQueue.push(cell);
+		return true;
 	}
-
-	// Check right neighbor
-	if (x < MSZ - 1 && !(maze.MAZE[y][x + 1]->GetIdentity() == WALL)) {
-		neighbors.push_back(maze.MAZE[y][x + 1]);
-	}
-
-	// Check top neighbor
-	if (y > 0 && !(maze.MAZE[y - 1][x]->GetIdentity() == WALL)) {
-		neighbors.push_back(maze.MAZE[y - 1][x]);
-	}
-
-	// Check bottom neighbor
-	if (y < MSZ - 1 && !(maze.MAZE[y + 1][x]->GetIdentity() == WALL)) {
-		neighbors.push_back(maze.MAZE[y + 1][x]);
-	}
-
-	return neighbors;
+	else
+		return false;
 }
 
 

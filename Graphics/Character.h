@@ -80,7 +80,7 @@ public:
 
 	void	MovePacman(Maze* gameInstance,Cell* target);
 	void	MoveGhost(int ghostNumber, int ghostValue);
-	std::vector<Cell*>	getPacmanNeighbors(Cell* cell, const Maze &maze);
+	bool	checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze* maze);
 
 	double	assertSafety(Maze* gameInstance, Cell* coinCell);
 	bool	CoinsRisk(Maze* gameInstance); 
