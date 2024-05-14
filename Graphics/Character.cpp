@@ -59,7 +59,7 @@ bool Character::PlayPacman(Maze* gameInstance)
 	
 	gameInstance->pacmanVector.push_back(this->getPosition());
 
-	//if pacman won return true to game
+	//if pacman won return true to game(no more coins to find)
 	if(CoinsRisk(gameInstance))
 		return true;
 	pacmanTarget = gameInstance->safeDistancePQ.top();
@@ -85,11 +85,39 @@ bool Character::PlayPacman(Maze* gameInstance)
 	{
 		if (isChasing)
 		{
-			//needs to move away from ghost
+			//checks if the current position is safer than the neighboring cells
+			int risk=assertSafety(gameInstance, pacmanTarget);
+
+			previousTarget = gameInstance->MAZE[pacmanTarget->GetRow() + 1][pacmanTarget->GetColumn()];
+
+			int newRisk = assertSafety(gameInstance, previousTarget);
+			if (newRisk < risk)
+				pacmanTarget = previousTarget;
+			
+			previousTarget = gameInstance->MAZE[pacmanTarget->GetRow() - 1][pacmanTarget->GetColumn()];
+
+			newRisk = assertSafety(gameInstance, previousTarget);
+			if (newRisk < risk)
+				pacmanTarget = previousTarget;
+
+			previousTarget = gameInstance->MAZE[pacmanTarget->GetRow()][pacmanTarget->GetColumn() + 1];
+
+			newRisk = assertSafety(gameInstance, previousTarget);
+			if (newRisk < risk)
+				pacmanTarget = previousTarget;
+			
+			previousTarget = gameInstance->MAZE[pacmanTarget->GetRow()][pacmanTarget->GetColumn() - 1];
+
+			newRisk = assertSafety(gameInstance, previousTarget);
+			if (newRisk < risk)
+				pacmanTarget = previousTarget;
+
+			this->SetTarget(pacmanTarget);
+			MovePacman(gameInstance, this->getTarget());
 		}
 		else if (isAttacking)
 		{
-			this->SetTarget(this->getPosition());
+			//staying in place need to check turn logic when pacman is attacked
 		}
 	}
 		gameInstance->pacmanVector.clear();
@@ -165,6 +193,9 @@ void Character::MovePacman(Maze* gameInstance, Cell* target)
 		if (currentCell->GetParent()->GetIdentity() == PACMAN)
 			break;
 	}
+
+
+
 
 }
 
