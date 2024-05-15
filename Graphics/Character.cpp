@@ -158,7 +158,7 @@ void Character::PlayGhost(Maze* mazeInstance, int ghostNumber)
 
 }
 
-void Character::MovePacman(Maze* gameInstance, Cell* target)
+bool Character::MovePacman(Maze* gameInstance, Cell* target)
 {
 	Cell* currentCell=nullptr;
 	int row, column;
@@ -193,6 +193,23 @@ void Character::MovePacman(Maze* gameInstance, Cell* target)
 		if (currentCell->GetParent()->GetIdentity() == PACMAN)
 			break;
 	}
+	currentCell->SetIdentity(PACMAN);
+	
+	this->SetPosition(currentCell);
+	currentCell = currentCell->GetParent();
+	// "Paint" the Pacman's previous cell with SPACE
+	gameInstance->MAZE[currentCell->GetRow()][currentCell->GetColumn()]->SetIdentity(SPACE);
+
+	if (Distance(this->getPosition(), target))
+	{
+		this->SetPacmanPoints(this->GetPacmanPoints() + 10);
+		cout << "Pacman found food and got " << this->GetPacmanPoints() * 100 << " points" << endl;
+		if (pacmanPoints == NUM_OF_FOOD)
+			return true;
+		else
+			return false;
+	}
+
 
 
 

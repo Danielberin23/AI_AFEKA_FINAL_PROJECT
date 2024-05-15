@@ -78,7 +78,7 @@ public:
 	bool	PlayPacman(Maze* gameInstance);
 	void	PlayGhost(Maze* gameInstance,int ghostNumber);
 
-	void	MovePacman(Maze* gameInstance,Cell* target);
+	bool	MovePacman(Maze* gameInstance,Cell* target);
 	void	MoveGhost(int ghostNumber, int ghostValue);
 	bool	checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze* maze);
 
