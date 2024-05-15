@@ -3,6 +3,7 @@
 #include "EatingState.h"
 #include "ChaseState.h"
 
+
 using namespace std;
 
 
@@ -92,7 +93,7 @@ bool Character::PlayPacman(Maze* gameInstance)
 		//pacman didn't won yet
 		return false;
 }
-void Character::PlayGhost(Maze* mazeInstance, int ghostNumber)
+bool Character::PlayGhost(Maze* mazeInstance, int ghostNumber)
 {
 	int ghostValue;
 	int numOfGhosts = 0;
@@ -110,26 +111,66 @@ void Character::PlayGhost(Maze* mazeInstance, int ghostNumber)
 
 	if (isChasing)
 	{
-		// if ghost is near the pacman we first check number of ghosts
-		getNumOfGhosts(&numOfGhosts, mazeInstance);
-		
 		// check distance between ghost and pacman
-		if ( (distance >= 1 && distance < CLOSE_DISTANCE) && numOfGhosts == 3)
+		if ( distance >= 1 && distance < CLOSE_DISTANCE)
 		{
-			this->GetCurrentState()->Transition(this); //move to attack mode
-			
+			//move to attack mode 
+			this->GetCurrentState()->Transition(this); 
+			MoveGhost(mazeInstance, ghostNumber, ghostValue);
 		}
 		
+		// else change position of the ghost 
 		else
 		{
-			/*ghostTarget->SetH(distance);
-			mazeInstance->ghostsPQ.push(ghostTarget);
-			MoveGhost(ghostNumber, ghostValue);
+			mazeInstance->ghosts[ghostNumber]->SetH(distance);
+			mazeInstance->ghostsPQ.push(mazeInstance->ghosts[ghostNumber]);
+			MoveGhost(mazeInstance, ghostNumber, ghostValue);
 			while (!mazeInstance->ghostsPQ.empty())
-				mazeInstance->ghostsPQ.pop();*/
+				mazeInstance->ghostsPQ.pop();
+		}
+	}
+
+	// in Attack state
+	else
+	{
+		if (isAttacking)
+		{
+			// if ghost is near the pacman we first check number of ghosts
+			getNumOfGhosts(&numOfGhosts, mazeInstance);
+
+			// check if all ghosts are in range of 1 of the ghost which attacking
+			// Three check required
+			int attackers = ghostsAttacking(mazeInstance);
+			if (attackers > 1)
+			{
+				// if there are at least 1 more ghost in range, than pacman looses
+				return true;
+			}
+
+			else
+			{
+				return false;
+			}
 		}
 	}
 }
+
+int Character::ghostsAttacking(Maze* mazeInstance)
+{
+	int numAttackers = 0;
+	for (int i = 0; i < NUM_OF_GHOSTS; i++)
+	{
+		// the distance between ghosts themselves, and distance between each ghost and pacman
+		if (Distance(mazeInstance->ghosts[i], mazeInstance->pacman) <= CLOSE_DISTANCE)
+			numAttackers += Distance(this->getPosition(), mazeInstance->ghosts[i]);
+	}
+
+	if (numAttackers > 1)
+		return numAttackers;
+
+	return 0;
+}
+
 
 void Character::getNumOfGhosts(int* num, Maze* mazeInstance)
 {
@@ -319,6 +360,8 @@ double Character::assertSafety(Maze * gameInstance, Cell* coinCell)
 		risk -= 3 * Distance(coinCell, gameInstance->pacman);
 	return risk;
 }
+
+
 
 bool Character::CoinsRisk(Maze* gameInstance)
 {

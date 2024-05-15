@@ -75,7 +75,7 @@ public:
 	
 	
 	bool	PlayPacman(Maze* gameInstance);
-	void	PlayGhost(Maze* gameInstance,int ghostNumber);
+	bool	PlayGhost(Maze* gameInstance,int ghostNumber);
 
 	void	MovePacman(Maze* gameInstance,Cell* target);
 	void	MoveGhost(Maze* gameInstance, int ghostNumber, int ghostValue);
@@ -89,4 +89,5 @@ public:
 
 	void getNumOfGhosts(int* num, Maze* mazeInstance);
 
+	int ghostsAttacking(Maze* mazeInstance);
 };
