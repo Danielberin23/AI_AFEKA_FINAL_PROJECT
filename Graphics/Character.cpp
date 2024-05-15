@@ -3,6 +3,7 @@
 #include "EatingState.h"
 #include "ChaseState.h"
 
+
 using namespace std;
 
 
@@ -44,14 +45,6 @@ double Character::Distance(Cell* n1, Cell* n2)
 	return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
 
-
-bool Character::isNearFood()
-{
-
-	return true;
-}
-
-
 bool Character::PlayPacman(Maze* gameInstance)
 {
 	Cell* pacmanTarget;
@@ -63,7 +56,7 @@ bool Character::PlayPacman(Maze* gameInstance)
 	if(CoinsRisk(gameInstance))
 		return true;
 	pacmanTarget = gameInstance->safeDistancePQ.top();
-	//if Pacman is moving target is food, change the target to the safest one
+	//if Pacman is moving, target is food, change the target to the safest one
 	if (isMoving)
 	{
 		if (previousTarget != nullptr)
@@ -81,6 +74,7 @@ bool Character::PlayPacman(Maze* gameInstance)
 		}
 		previousTarget = pacmanTarget;
 	}
+
 	else
 	{
 		if (isChasing)
@@ -127,9 +121,11 @@ bool Character::PlayPacman(Maze* gameInstance)
 		//pacman didn't won yet
 		return false;
 }
-void Character::PlayGhost(Maze* mazeInstance, int ghostNumber)
+bool Character::PlayGhost(Maze* mazeInstance, int ghostNumber)
 {
 	int ghostValue;
+	int numOfGhosts = 0;
+
 	//PICK WHICH GHOST IS THE PLAYER
 	if (ghostNumber == 0)
 		ghostValue = GHOST_1;
@@ -141,21 +137,83 @@ void Character::PlayGhost(Maze* mazeInstance, int ghostNumber)
 	
 	double distance = Distance(mazeInstance->pacman, mazeInstance->ghosts[ghostNumber]);
 
-
-	// if ghost is near the pacman we first check number of ghosts
-	if (distance >= 1 && distance < CLOSE_DISTANCE)
+	if (isChasing)
 	{
-		this->GetCurrentState()->Transition(this);//move to attack mode
+		// check distance between ghost and pacman
+		if ( distance >= 1 && distance < CLOSE_DISTANCE)
+		{
+			//move to attack mode 
+			this->GetCurrentState()->Transition(this); 
+			MoveGhost(mazeInstance, ghostNumber, ghostValue);
+		}
+		
+		// else change position of the ghost 
+		else
+		{
+			mazeInstance->ghosts[ghostNumber]->SetH(distance);
+			mazeInstance->ghostsPQ.push(mazeInstance->ghosts[ghostNumber]);
+			MoveGhost(mazeInstance, ghostNumber, ghostValue);
+			while (!mazeInstance->ghostsPQ.empty())
+				mazeInstance->ghostsPQ.pop();
+		}
 	}
+
+	// in Attack state
 	else
 	{
-		/*ghostTarget->SetH(distance);
-		mazeInstance->ghostsPQ.push(ghostTarget);
-		MoveGhost(ghostNumber, ghostValue);
-		while (!mazeInstance->ghostsPQ.empty())
-			mazeInstance->ghostsPQ.pop();*/
+		if (isAttacking)
+		{
+			// if ghost is near the pacman we first check number of ghosts
+			getNumOfGhosts(&numOfGhosts, mazeInstance);
+
+			// check if all ghosts are in range of 1 of the ghost which attacking
+			// Three check required
+			int attackers = ghostsAttacking(mazeInstance);
+			if (attackers > 1)
+			{
+				// if there are at least 1 more ghost in range, than pacman looses
+				return true;
+			}
+
+			else
+			{
+				return false;
+			}
+		}
+	}
+}
+
+int Character::ghostsAttacking(Maze* mazeInstance)
+{
+	int numAttackers = 0;
+	for (int i = 0; i < NUM_OF_GHOSTS; i++)
+	{
+		// the distance between ghosts themselves, and distance between each ghost and pacman
+		if (Distance(mazeInstance->ghosts[i], mazeInstance->pacman) <= CLOSE_DISTANCE)
+			numAttackers += Distance(this->getPosition(), mazeInstance->ghosts[i]);
 	}
 
+	if (numAttackers > 1)
+		return numAttackers;
+
+	return 0;
+}
+
+
+void Character::getNumOfGhosts(int* num, Maze* mazeInstance)
+{
+	int temp = 0;
+	for (int i = 0; i < MSZ; i++)
+	{
+		for (int j = 0; j < MSZ; j++)
+		{
+			if (mazeInstance->MAZE[i][j]->GetIdentity() != WALL && mazeInstance->MAZE[i][j]->GetIdentity() != PACMAN
+				&& mazeInstance->MAZE[i][j]->GetIdentity() != FOOD)
+				temp++;
+		}
+	}
+
+	*num = temp;
 }
 
 bool Character::MovePacman(Maze* gameInstance, Cell* target)
@@ -217,9 +275,103 @@ bool Character::MovePacman(Maze* gameInstance, Cell* target)
 }
 
 
-void Character::MoveGhost(int ghostNumber, int ghostValue)
+void Character::MoveGhost(Maze* gameInstance, int ghostNumber, int ghostValue)
 {
+	Cell* temp = nullptr;
+	int row, column;
+	
+	// A*
+	while (!gameInstance->ghostsPQ.empty())
+	{
+		// getting the priority position and popping it out of the queue
+		temp = gameInstance->ghostsPQ.top();
+		gameInstance->ghostsPQ.pop();
 
+		row = temp->GetRow();
+		column = temp->GetColumn();
+
+		// if pacman position is found...
+		if (row == gameInstance->pacman->GetRow() && column == gameInstance->pacman->GetColumn())
+			break;
+
+		// Return an iterator to the first element in the range given that compares equal
+		// to the temp Cell. If no such element is found, the function returns the last element.
+		gameInstance->graysIterator = find(gameInstance->graysVector.begin()
+			, gameInstance->graysVector.end(), temp);
+
+		// If the element returned is not the last element, erase it from the vector
+		if (gameInstance->graysIterator != gameInstance->graysVector.end())
+			gameInstance->graysVector.erase(gameInstance->graysIterator);
+
+		// Push the temp Cell to the blacks Vector
+		gameInstance->blacksVector.push_back(temp);
+
+		// up
+		checkGhostNeighbors(0, -1, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
+		// down
+		checkGhostNeighbors(0,  1, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
+		//left
+		checkGhostNeighbors(-1, 0, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
+		// right
+		checkGhostNeighbors(1,  0, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
+	}
+
+	// Restore the best path found and get the next cell to move to
+	while (true)
+	{
+		temp = temp->GetParent();
+		if (temp->GetParent()->GetIdentity() == ghostValue)
+			break;
+
+		// temp pointing to the next cell position of ghost. 
+		// which was calculated
+	}
+	// setting identity of new cell to be the ghost[number]
+	temp->SetIdentity(ghostValue);
+	// inserting new ghost position
+	gameInstance->ghosts[ghostNumber] = temp;
+	// getting old ghost's position
+	temp = temp->GetParent();
+	// put SPACE in that old position
+	gameInstance->MAZE[temp->GetRow()][temp->GetColumn()]->SetIdentity(SPACE);
+
+	//clear vectors
+	gameInstance->blacksVector.clear();
+	gameInstance->graysVector.clear();
+}
+
+// A function to check Ghost's neighbor cells
+bool Character::checkGhostNeighbors(int rowOffset, int columnOffset, 
+	Cell* pCurr, int ghostNumber, int ghostValue, Maze* gameInstance, int cellIdentity)
+{
+	Cell* temp;
+	// coping pCurrent to temp
+	temp = gameInstance->MAZE[pCurr->GetRow() + rowOffset][pCurr->GetColumn() + columnOffset];
+	
+	// Find that Cell in the blacks Vector
+	gameInstance->blacksIterator = find(gameInstance->blacksVector.begin(),
+		gameInstance->blacksVector.end(), temp);
+
+	//Find that Cell in the grays Vector
+	gameInstance->graysIterator = find(gameInstance->graysVector.begin(),
+		gameInstance->graysVector.end(), temp);
+
+	// Check if the Cell is not a WALL, and if it was the last element on both blacks and grays Vector
+	// Also, verify the Cell is not a Ghost
+	if (temp->GetIdentity() != WALL && !gameInstance->IsGhost(temp->GetIdentity())
+		&& gameInstance->graysIterator == gameInstance->graysVector.end() 
+		&& gameInstance->blacksIterator == gameInstance->blacksVector.end())
+	{
+		// set neighbor Cell's parent
+		temp->SetParent(pCurr);
+		// Push the Neighboring Cell to the grays Vector
+		gameInstance->graysVector.push_back(temp);
+		// Set the Neighboring Cell G to the Ghost's G + some step penalty
+		temp->SetG(temp->GetG() + STEP_PENALTY);
+
+	}
+	
+	return true;
 }
 
 bool Character::checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze* maze)
@@ -233,6 +385,8 @@ bool Character::checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze* maze)
 	else
 		return false;
 }
+
+
 
 
 double Character::assertSafety(Maze * gameInstance, Cell* coinCell)
@@ -254,6 +408,8 @@ double Character::assertSafety(Maze * gameInstance, Cell* coinCell)
 		risk -= 3 * Distance(coinCell, gameInstance->pacman);
 	return risk;
 }
+
+
 
 bool Character::CoinsRisk(Maze* gameInstance)
 {

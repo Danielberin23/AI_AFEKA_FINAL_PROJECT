@@ -19,7 +19,7 @@ void init()
 	//srand(static_cast<unsigned int>(time(NULL)));  // Explicit cast to unsigned int
 	glClearColor(0, 0.5, 0.8, 0);// color of window background
 	glOrtho(-1, 1, -1, 1, -1, 1); // set the coordinates system
-
+	
 }
 
 

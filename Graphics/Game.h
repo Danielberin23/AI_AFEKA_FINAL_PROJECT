@@ -11,8 +11,7 @@
 
 
 
-const int PacmanFightDelay = 2;
-
+int PacmanFightDelay = 2;
 
 
 class Game {

@@ -44,6 +44,6 @@ void Game::Play(Character* character)
 		this->pacmanWon = Pacman->PlayPacman(BoardInstance);
 	else
 		for (int i = 0; i < NUM_OF_GHOSTS; i++)
-			Ghosts[i]->PlayGhost(BoardInstance, i);
-
+			this->ghostsWon = Ghosts[i]->PlayGhost(BoardInstance, i);
+		
 }
