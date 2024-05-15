@@ -55,7 +55,7 @@ bool Character::PlayPacman(Maze* gameInstance)
 	if(CoinsRisk(gameInstance))
 		return true;
 	pacmanTarget = gameInstance->safeDistancePQ.top();
-	//if Pacman is moving target is food, change the target to the safest one
+	//if Pacman is moving, target is food, change the target to the safest one
 	if (isMoving)
 	{
 		if (previousTarget != nullptr)
@@ -73,6 +73,7 @@ bool Character::PlayPacman(Maze* gameInstance)
 		}
 		previousTarget = pacmanTarget;
 	}
+
 	else
 	{
 		if (isChasing)
@@ -94,6 +95,8 @@ bool Character::PlayPacman(Maze* gameInstance)
 void Character::PlayGhost(Maze* mazeInstance, int ghostNumber)
 {
 	int ghostValue;
+	int numOfGhosts = 0;
+
 	//PICK WHICH GHOST IS THE PLAYER
 	if (ghostNumber == 0)
 		ghostValue = GHOST_1;
@@ -105,21 +108,43 @@ void Character::PlayGhost(Maze* mazeInstance, int ghostNumber)
 	
 	double distance = Distance(mazeInstance->pacman, mazeInstance->ghosts[ghostNumber]);
 
-
-	// if ghost is near the pacman we first check number of ghosts
-	if (distance >= 1 && distance < CLOSE_DISTANCE)
+	if (isChasing)
 	{
-		this->GetCurrentState()->Transition(this);//move to attack mode
+		// if ghost is near the pacman we first check number of ghosts
+		getNumOfGhosts(&numOfGhosts, mazeInstance);
+		
+		// check distance between ghost and pacman
+		if ( (distance >= 1 && distance < CLOSE_DISTANCE) && numOfGhosts == 3)
+		{
+			this->GetCurrentState()->Transition(this); //move to attack mode
+			
+		}
+		
+		else
+		{
+			/*ghostTarget->SetH(distance);
+			mazeInstance->ghostsPQ.push(ghostTarget);
+			MoveGhost(ghostNumber, ghostValue);
+			while (!mazeInstance->ghostsPQ.empty())
+				mazeInstance->ghostsPQ.pop();*/
+		}
 	}
-	else
+}
+
+void Character::getNumOfGhosts(int* num, Maze* mazeInstance)
+{
+	int temp = 0;
+	for (int i = 0; i < MSZ; i++)
 	{
-		/*ghostTarget->SetH(distance);
-		mazeInstance->ghostsPQ.push(ghostTarget);
-		MoveGhost(ghostNumber, ghostValue);
-		while (!mazeInstance->ghostsPQ.empty())
-			mazeInstance->ghostsPQ.pop();*/
+		for (int j = 0; j < MSZ; j++)
+		{
+			if (mazeInstance->MAZE[i][j]->GetIdentity() != WALL && mazeInstance->MAZE[i][j]->GetIdentity() != PACMAN
+				&& mazeInstance->MAZE[i][j]->GetIdentity() != FOOD)
+				temp++;
+		}
 	}
 
+	*num = temp;
 }
 
 void Character::MovePacman(Maze* gameInstance, Cell* target)
