@@ -72,15 +72,16 @@ public:
 	
 	void	SetCurrentState(State* ps) { pCurrentState = ps; }
 	double	Distance(Cell* n1, Cell* n2);
-	bool	isNearFood();//not used
 	
 	
 	bool	PlayPacman(Maze* gameInstance);
 	void	PlayGhost(Maze* gameInstance,int ghostNumber);
 
 	void	MovePacman(Maze* gameInstance,Cell* target);
-	void	MoveGhost(int ghostNumber, int ghostValue);
+	void	MoveGhost(Maze* gameInstance, int ghostNumber, int ghostValue);
 	bool	checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze* maze);
+
+	bool	checkGhostNeighbors(int rowOffset, int columnOffset, Cell* pCurrentCell, int ghostNumber, int ghostValue, Maze* gameInstance);
 
 	double	assertSafety(Maze* gameInstance, Cell* coinCell);
 	bool	CoinsRisk(Maze* gameInstance); 

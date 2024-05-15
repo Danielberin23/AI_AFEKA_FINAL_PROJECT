@@ -44,14 +44,6 @@ double Character::Distance(Cell* n1, Cell* n2)
 	return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
 
-
-bool Character::isNearFood()
-{
-
-	return true;
-}
-
-
 bool Character::PlayPacman(Maze* gameInstance)
 {
 	Cell* pacmanTarget;
@@ -169,9 +161,69 @@ void Character::MovePacman(Maze* gameInstance, Cell* target)
 }
 
 
-void Character::MoveGhost(int ghostNumber, int ghostValue)
+void Character::MoveGhost(Maze* gameInstance, int ghostNumber, int ghostValue)
 {
+	Cell* temp = nullptr;
+	int row, column;
+	bool go_on = true;
+	
+	// A*
+	while (!gameInstance->ghostsPQ.empty())
+	{
+		// getting the priority position and popping it out of the queue
+		temp = gameInstance->ghostsPQ.top();
+		gameInstance->ghostsPQ.pop();
 
+		row = temp->GetRow();
+		column = temp->GetColumn();
+		if (row == gameInstance->pacman->GetRow() && column == gameInstance->pacman->GetColumn())
+			return;
+
+		// up
+		checkGhostNeighbors(0, -1, temp, ghostNumber, ghostValue, gameInstance);
+		// down
+		checkGhostNeighbors(0,  1, temp, ghostNumber, ghostValue, gameInstance);
+		//left
+		checkGhostNeighbors(-1, 0, temp, ghostNumber, ghostValue, gameInstance);
+		// right
+		checkGhostNeighbors(1,  0, temp, ghostNumber, ghostValue, gameInstance);
+	}
+
+	// Restore the best path found and get the next cell to move to
+	while (true)
+	{
+		temp = temp->GetParent();
+		if (temp->GetParent()->GetIdentity() == ghostValue)
+			break;
+
+		// temp pointing to the next cell position of ghost. 
+		// which was calculated
+	}
+	// setting identity of new cell to be the ghost[number]
+	temp->SetIdentity(ghostValue);
+	// inserting new ghost position
+	gameInstance->ghosts[ghostNumber] = temp;
+	// getting old ghost's position
+	temp = temp->GetParent();
+	// put SPACE in that old position
+	gameInstance->MAZE[temp->GetRow()][temp->GetColumn()]->SetIdentity(SPACE);
+
+}
+
+bool Character::checkGhostNeighbors(int rowOffset, int columnOffset, Cell* pCurr, int ghostNumber, int ghostValue, Maze* gameInstance)
+{
+	Cell* temp;
+	// coping pCurrent to temp
+	temp = gameInstance->MAZE[pCurr->GetRow() + rowOffset][pCurr->GetColumn() + columnOffset];
+
+	if (temp->GetIdentity() != WALL && !gameInstance->IsGhost(temp->GetIdentity()))
+	{
+		// set neighbor Cell's parent
+		temp->SetParent(pCurr);
+		temp
+	}
+
+		return true;
 }
 
 bool Character::checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze* maze)
@@ -185,6 +237,8 @@ bool Character::checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze* maze)
 	else
 		return false;
 }
+
+
 
 
 double Character::assertSafety(Maze * gameInstance, Cell* coinCell)
