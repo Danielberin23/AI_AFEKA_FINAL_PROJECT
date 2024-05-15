@@ -81,7 +81,8 @@ public:
 	void	MoveGhost(Maze* gameInstance, int ghostNumber, int ghostValue);
 	bool	checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze* maze);
 
-	bool	checkGhostNeighbors(int rowOffset, int columnOffset, Cell* pCurrentCell, int ghostNumber, int ghostValue, Maze* gameInstance);
+	bool	checkGhostNeighbors(int rowOffset, int columnOffset,
+		Cell* pCurrentCell, int ghostNumber, int ghostValue, Maze* gameInstance, int cellIdentity);
 
 	double	assertSafety(Maze* gameInstance, Cell* coinCell);
 	bool	CoinsRisk(Maze* gameInstance); 

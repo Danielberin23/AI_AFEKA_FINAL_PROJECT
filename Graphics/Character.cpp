@@ -165,7 +165,6 @@ void Character::MoveGhost(Maze* gameInstance, int ghostNumber, int ghostValue)
 {
 	Cell* temp = nullptr;
 	int row, column;
-	bool go_on = true;
 	
 	// A*
 	while (!gameInstance->ghostsPQ.empty())
@@ -176,17 +175,31 @@ void Character::MoveGhost(Maze* gameInstance, int ghostNumber, int ghostValue)
 
 		row = temp->GetRow();
 		column = temp->GetColumn();
+
+		// if pacman position is found...
 		if (row == gameInstance->pacman->GetRow() && column == gameInstance->pacman->GetColumn())
-			return;
+			break;
+
+		// Return an iterator to the first element in the range given that compares equal
+		// to the temp Cell. If no such element is found, the function returns the last element.
+		gameInstance->graysIterator = find(gameInstance->graysVector.begin()
+			, gameInstance->graysVector.end(), temp);
+
+		// If the element returned is not the last element, erase it from the vector
+		if (gameInstance->graysIterator != gameInstance->graysVector.end())
+			gameInstance->graysVector.erase(gameInstance->graysIterator);
+
+		// Push the temp Cell to the blacks Vector
+		gameInstance->blacksVector.push_back(temp);
 
 		// up
-		checkGhostNeighbors(0, -1, temp, ghostNumber, ghostValue, gameInstance);
+		checkGhostNeighbors(0, -1, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
 		// down
-		checkGhostNeighbors(0,  1, temp, ghostNumber, ghostValue, gameInstance);
+		checkGhostNeighbors(0,  1, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
 		//left
-		checkGhostNeighbors(-1, 0, temp, ghostNumber, ghostValue, gameInstance);
+		checkGhostNeighbors(-1, 0, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
 		// right
-		checkGhostNeighbors(1,  0, temp, ghostNumber, ghostValue, gameInstance);
+		checkGhostNeighbors(1,  0, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
 	}
 
 	// Restore the best path found and get the next cell to move to
@@ -208,22 +221,43 @@ void Character::MoveGhost(Maze* gameInstance, int ghostNumber, int ghostValue)
 	// put SPACE in that old position
 	gameInstance->MAZE[temp->GetRow()][temp->GetColumn()]->SetIdentity(SPACE);
 
+	//clear vectors
+	gameInstance->blacksVector.clear();
+	gameInstance->graysVector.clear();
 }
 
-bool Character::checkGhostNeighbors(int rowOffset, int columnOffset, Cell* pCurr, int ghostNumber, int ghostValue, Maze* gameInstance)
+// A function to check Ghost's neighbor cells
+bool Character::checkGhostNeighbors(int rowOffset, int columnOffset, 
+	Cell* pCurr, int ghostNumber, int ghostValue, Maze* gameInstance, int cellIdentity)
 {
 	Cell* temp;
 	// coping pCurrent to temp
 	temp = gameInstance->MAZE[pCurr->GetRow() + rowOffset][pCurr->GetColumn() + columnOffset];
+	
+	// Find that Cell in the blacks Vector
+	gameInstance->blacksIterator = find(gameInstance->blacksVector.begin(),
+		gameInstance->blacksVector.end(), temp);
 
-	if (temp->GetIdentity() != WALL && !gameInstance->IsGhost(temp->GetIdentity()))
+	//Find that Cell in the grays Vector
+	gameInstance->graysIterator = find(gameInstance->graysVector.begin(),
+		gameInstance->graysVector.end(), temp);
+
+	// Check if the Cell is not a WALL, and if it was the last element on both blacks and grays Vector
+	// Also, verify the Cell is not a Ghost
+	if (temp->GetIdentity() != WALL && !gameInstance->IsGhost(temp->GetIdentity())
+		&& gameInstance->graysIterator == gameInstance->graysVector.end() 
+		&& gameInstance->blacksIterator == gameInstance->blacksVector.end())
 	{
 		// set neighbor Cell's parent
 		temp->SetParent(pCurr);
-		temp
-	}
+		// Push the Neighboring Cell to the grays Vector
+		gameInstance->graysVector.push_back(temp);
+		// Set the Neighboring Cell G to the Ghost's G + some step penalty
+		temp->SetG(temp->GetG() + STEP_PENALTY);
 
-		return true;
+	}
+	
+	return true;
 }
 
 bool Character::checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze* maze)
