@@ -38,7 +38,7 @@ void idle()
 void menu(int choice)
 {
 
-	/*switch (choice)
+	switch (choice)
 	{
 	case 0:
 		if (!game->IsGhostWon() && !game->IsPacmanWon())
@@ -62,11 +62,11 @@ void menu(int choice)
 		display();
 		break;
 
-	}*/
+	}
 	
 }
 
-int main(int argc, char* argv[]) 
+void main(int argc, char* argv[]) 
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
@@ -88,6 +88,4 @@ int main(int argc, char* argv[])
 	init();
 
 	glutMainLoop();
-
-	return 0;
 }

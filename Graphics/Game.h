@@ -11,7 +11,7 @@
 
 
 
-int PacmanFightDelay = 2;
+
 
 
 class Game {

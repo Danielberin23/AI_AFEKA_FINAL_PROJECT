@@ -61,7 +61,7 @@ void Maze::InitMaze()
 		j = rand() % MSZ;
 	} while (MAZE[i][j]->GetIdentity() != SPACE);
 	MAZE[i][j]->SetIdentity(PACMAN);
-	pacman = MAZE[i][j];
+	pacman =new Cell(MAZE[i][j]);
 	pacmanQueue.push(pacman);//cell* pacman
 }
 
@@ -94,7 +94,7 @@ void Maze::AddFood()
 			i = rand() % MSZ;
 			j = rand() % MSZ;
 		} while (MAZE[i][j]->GetIdentity() != SPACE);
-		MAZE[i][j]->SetFood(true);
+		MAZE[i][j]->SetIdentity(FOOD);
 	}
 }
 void Maze::AddGhosts()
@@ -115,7 +115,7 @@ void Maze::AddGhosts()
 			MAZE[i][j]->SetIdentity(GHOST_2);
 		else if (k == 2)
 			MAZE[i][j]->SetIdentity(GHOST_3);
-		ghosts[k]= new Cell(MAZE[i][j]);
+		ghosts[k]=new Cell(MAZE[i][j]);
 	}
 }
 int Maze::numOfSpaces()
@@ -199,9 +199,6 @@ void Maze::DrawMaze()
 			switch (MAZE[i][j]->GetIdentity())   // set color
 			{
 			case SPACE:
-				if (MAZE[i][j]->IsFood())
-					glColor3d(1, 1, 1); // White
-				else
 					glColor3d(0, 0, 0); // Black
 				break;
 			case WALL:
@@ -222,6 +219,8 @@ void Maze::DrawMaze()
 			case GHOST_3:
 				glColor3d(0.5, 0.2, 1); // Purple
 				break;
+			case FOOD:
+				glColor3d(1, 1, 1); // White
 			}
 			// Draw square -> maze[i][j]
 			x = 2.0 * (j * xsz) / WIDTH - 1; // value in range [-1,1)

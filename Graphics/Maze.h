@@ -13,7 +13,7 @@
 using namespace std;
 
 const int MSZ = 50;
-
+const int PacmanFightDelay = 2;
 
 class Maze {
 public:
