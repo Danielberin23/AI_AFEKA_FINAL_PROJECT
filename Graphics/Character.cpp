@@ -211,7 +211,7 @@ int Character::ghostsAttacking(Maze& mazeInstance)
 	{
 		// the distance between ghosts themselves, and distance between each ghost and pacman
 		if (Distance(mazeInstance.ghosts[i], mazeInstance.pacman) <= CLOSE_DISTANCE)
-			numAttackers += Distance(this->getPosition(), mazeInstance.ghosts[i]);
+			numAttackers ++;
 	}
 
 	if (numAttackers > 1)
@@ -234,7 +234,7 @@ void Character::getNumOfGhosts(int* num, Maze& mazeInstance)
 		}
 	}
 
-	*num = temp;
+	num = &temp;
 }
 
 bool Character::MovePacman(Maze& gameInstance, Cell* target)
@@ -254,21 +254,18 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 		/*if(gameInstance->IsGhost(gameInstance->MAZE[row][column]->GetIdentity()))
 			break;*/
 		// up
-			go_on = checkPacmanNeighbors(currentCell,gameInstance.MAZE[row + 1][column], gameInstance);
+		checkPacmanNeighbors(currentCell,gameInstance.MAZE[row + 1][column], gameInstance);
 		// down
-		if (go_on)
-			go_on = checkPacmanNeighbors(currentCell, gameInstance.MAZE[row - 1][column], gameInstance);
+		 checkPacmanNeighbors(currentCell, gameInstance.MAZE[row - 1][column], gameInstance);
 		// left
-		if (go_on)
-			go_on = checkPacmanNeighbors(currentCell, gameInstance.MAZE[row][column - 1], gameInstance);
+		 checkPacmanNeighbors(currentCell, gameInstance.MAZE[row][column - 1], gameInstance);
 		// right
-		if (go_on)
-			go_on = checkPacmanNeighbors(currentCell, gameInstance.MAZE[row ][column+ 1], gameInstance);
+		 checkPacmanNeighbors(currentCell, gameInstance.MAZE[row ][column+ 1], gameInstance);
 
 		currentDepth++;
 	}
 	////restore path
-	while (true)
+	while (currentCell->GetParent() != nullptr)
 	{
 		currentCell = currentCell->GetParent();
 		if (currentCell->GetParent()->GetIdentity() == PACMAN)
@@ -281,7 +278,7 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 	}
 		currentCell->SetIdentity(PACMAN);
 
-		gameInstance.pacman =currentCell;
+		gameInstance.pacman = currentCell;
 		currentCell = currentCell->GetParent();
 		// "Paint" the Pacman's previous cell with SPACE
 		gameInstance.MAZE[currentCell->GetRow()][currentCell->GetColumn()]->SetIdentity(SPACE);
