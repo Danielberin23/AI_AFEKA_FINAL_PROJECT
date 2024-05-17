@@ -53,7 +53,7 @@ bool Character::PlayPacman(Maze& gameInstance)
 	int numOfGhosts;
 	getNumOfGhosts(&numOfGhosts, gameInstance);
 	
-	gameInstance.pacmanVector.push_back(this->getPosition());
+	gameInstance.pacmanVector.push_back(gameInstance.pacman);
 
 	//if pacman won return true to game(no more coins to find)
 	if(CoinsRisk(gameInstance))
@@ -175,8 +175,7 @@ bool Character::PlayGhost(Maze& mazeInstance, int ghostNumber)
 			mazeInstance.ghosts[ghostNumber]->SetH(distance);
 			mazeInstance.ghostsPQ.push(mazeInstance.ghosts[ghostNumber]);
 			MoveGhost(mazeInstance, ghostNumber, ghostValue);
-			while (!mazeInstance.ghostsPQ.empty())
-				mazeInstance.ghostsPQ.pop();
+			
 		}
 	}
 
@@ -201,6 +200,9 @@ bool Character::PlayGhost(Maze& mazeInstance, int ghostNumber)
 				return false;
 		}
 	}
+
+	while (!mazeInstance.ghostsPQ.empty())
+		mazeInstance.ghostsPQ.pop();
 	return false;
 }
 
@@ -228,8 +230,7 @@ void Character::getNumOfGhosts(int* num, Maze& mazeInstance)
 	{
 		for (int j = 0; j < MSZ; j++)
 		{
-			if (mazeInstance.MAZE[i][j]->GetIdentity() != WALL && mazeInstance.MAZE[i][j]->GetIdentity() != PACMAN
-				&& mazeInstance.MAZE[i][j]->GetIdentity() != FOOD)
+			if (mazeInstance.IsGhost(mazeInstance.MAZE[i][j]->GetIdentity()))
 				temp++;
 		}
 	}
@@ -243,7 +244,7 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 	int row, column;
 	bool go_on = true;
 	int currentDepth = 0;
-	while (!gameInstance.pacmanQueue.empty()&&currentDepth<=DEPTH)
+	while (!gameInstance.pacmanQueue.empty()  && currentDepth<=DEPTH)
 	{
 		currentCell = gameInstance.pacmanQueue.front();
 		gameInstance.pacmanQueue.pop();
@@ -251,8 +252,7 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 		column = currentCell->GetColumn();
 		if (row == target->GetRow() && column == target->GetColumn())
 			break;
-		/*if(gameInstance->IsGhost(gameInstance->MAZE[row][column]->GetIdentity()))
-			break;*/
+		
 		// up
 		checkPacmanNeighbors(currentCell,gameInstance.MAZE[row + 1][column], gameInstance);
 		// down
@@ -260,7 +260,7 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 		// left
 		 checkPacmanNeighbors(currentCell, gameInstance.MAZE[row][column - 1], gameInstance);
 		// right
-		 checkPacmanNeighbors(currentCell, gameInstance.MAZE[row ][column+ 1], gameInstance);
+		 checkPacmanNeighbors(currentCell, gameInstance.MAZE[row][column+ 1], gameInstance);
 
 		currentDepth++;
 	}
@@ -292,7 +292,7 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 		else
 			return false;
 	}
-		
+	return false;
 }
 
 
@@ -338,7 +338,7 @@ void Character::MoveGhost(Maze& gameInstance, int ghostNumber, int ghostValue)
 	}
 
 	// Restore the best path found and get the next cell to move to
-	while (true)
+	while (temp->GetParent() != nullptr)
 	{
 		temp = temp->GetParent();
 		if (temp->GetParent()->GetIdentity() == ghostValue)
@@ -410,7 +410,7 @@ bool Character::checkGhostNeighbors(int rowOffset, int columnOffset,
 
 bool Character::checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze& maze)
 {
-	if (maze.MAZE[cell->GetRow()][cell->GetColumn()]->GetIdentity() == SPACE)
+	if (maze.MAZE[cell->GetRow()][cell->GetColumn()]->GetIdentity() == SPACE && maze.MAZE[cell->GetRow()][cell->GetColumn()]->GetIdentity()!=WALL)
 	{
 		cell->SetParent(previousCell);
 		maze.pacmanQueue.push(cell);
@@ -454,7 +454,7 @@ bool Character::CoinsRisk(Maze& gameInstance)
 	{
 		for (j = 0; j < MSZ; j++)
 		{
-			if (gameInstance.MAZE[i][j]->GetIdentity()== FOOD)
+			if (gameInstance.MAZE[i][j]->GetIdentity() == FOOD)
 			{
 				foundCoin = true;
 				// Calculate the safe distance for the coin Cell
