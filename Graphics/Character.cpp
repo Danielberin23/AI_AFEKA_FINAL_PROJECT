@@ -252,6 +252,16 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 		column = currentCell->GetColumn();
 		if (row == target->GetRow() && column == target->GetColumn())
 			break;
+
+		gameInstance.graysIterator = find(gameInstance.graysVector.begin()
+			, gameInstance.graysVector.end(), currentCell);
+
+		// If the element returned is not the last element, erase it from the vector
+		if (gameInstance.graysIterator != gameInstance.graysVector.end())
+			gameInstance.graysVector.erase(gameInstance.graysIterator);
+
+		// Push the temp Cell to the blacks Vector
+		gameInstance.blacksVector.push_back(currentCell);
 		
 		// up
 		checkPacmanNeighbors(currentCell,gameInstance.MAZE[row + 1][column], gameInstance);
@@ -274,6 +284,8 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 	if (ghostsAttacking(gameInstance) > 0 && this->Moves < PacmanFightDelay)
 	{
 		this->GetCurrentState()->Transition(this);
+		gameInstance.blacksVector.clear();
+		gameInstance.graysVector.clear();
 		return false;//ghost won, they will return true if won but we stop the loop
 	}
 		currentCell->SetIdentity(PACMAN);
@@ -283,15 +295,25 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 		// "Paint" the Pacman's previous cell with SPACE
 		gameInstance.MAZE[currentCell->GetRow()][currentCell->GetColumn()]->SetIdentity(SPACE);
 	
-	if (Distance(this->getPosition(), target))
+	if (Distance(this->getPosition(), target)==1)
 	{
 		this->SetPacmanPoints(this->GetPacmanPoints() + 10);
 		cout << "Pacman found food and got " << this->GetPacmanPoints() * 100 << " points" << endl;
 		if (pacmanPoints == NUM_OF_FOOD)
+		{
+			gameInstance.blacksVector.clear();
+			gameInstance.graysVector.clear();
 			return true;
+		}
 		else
+		{
+			gameInstance.blacksVector.clear();
+			gameInstance.graysVector.clear();
 			return false;
+		}
 	}
+	gameInstance.blacksVector.clear();
+	gameInstance.graysVector.clear();
 	return false;
 }
 
@@ -348,12 +370,15 @@ void Character::MoveGhost(Maze& gameInstance, int ghostNumber, int ghostValue)
 		// which was calculated
 	}
 	//don't move ghost if is attacking
-	if (Distance(gameInstance.pacman, temp) <= CLOSE_DISTANCE)
+	if (Distance(gameInstance.pacman, temp) == 1)
 	{
 		// change from chasing to attacking
 		if(this->Moves==0)
 			this->GetCurrentState()->Transition(this);//change from chasing to attacking
 		this->Moves++;
+
+		gameInstance.blacksVector.clear();
+		gameInstance.graysVector.clear();
 		return;
 	}
 	// setting identity of new cell to be the ghost[number]
@@ -410,9 +435,19 @@ bool Character::checkGhostNeighbors(int rowOffset, int columnOffset,
 
 bool Character::checkPacmanNeighbors(Cell* previousCell, Cell* cell, Maze& maze)
 {
-	if (maze.MAZE[cell->GetRow()][cell->GetColumn()]->GetIdentity() == SPACE && maze.MAZE[cell->GetRow()][cell->GetColumn()]->GetIdentity()!=WALL)
+	maze.blacksIterator = find(maze.blacksVector.begin(),
+		maze.blacksVector.end(), cell);
+
+	maze.graysIterator = find(maze.graysVector.begin(),
+		maze.graysVector.end(), cell);
+
+	if (maze.MAZE[cell->GetRow()][cell->GetColumn()]->GetIdentity() == SPACE && 
+		maze.MAZE[cell->GetRow()][cell->GetColumn()]->GetIdentity()!=WALL
+		&& maze.graysIterator == maze.graysVector.end()
+		&& maze.blacksIterator == maze.blacksVector.end())	
 	{
 		cell->SetParent(previousCell);
+		maze.graysVector.push_back(cell);
 		maze.pacmanQueue.push(cell);
 		return true;
 	}
