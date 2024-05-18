@@ -37,6 +37,7 @@ void Maze::InitMaze()
 		MAZE[i][0]->SetIdentity(WALL);
 		MAZE[i][MSZ - 1]->SetIdentity(WALL);
 	}
+
 	for (i = 2; i < MSZ - 2; i++)
 	{
 		for (j = 2; j < MSZ - 2; j++)
