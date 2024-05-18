@@ -14,7 +14,7 @@ Character::Character(bool IsPacman, Cell* Position)
 	this->SetPosition(Position);
 	this->SetIsPacman(IsPacman);
 	//Pacman is eating food and Ghost is chasing pacman 
-	if (!IsPacman)
+	if (IsPacman)
 		pCurrentState = new EatingState();
 	else
 		pCurrentState = new ChaseState();
