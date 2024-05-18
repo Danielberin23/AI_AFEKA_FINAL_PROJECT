@@ -173,7 +173,7 @@ bool Character::PlayGhost(Maze& mazeInstance, int ghostNumber)
 		// else change position of the ghost 
 		else
 		{
-			mazeInstance.ghosts[ghostNumber]->SetH(distance);
+			mazeInstance.ghosts[ghostNumber]->SetH(distance + STEP_PENALTY);
 			mazeInstance.ghostsPQ.push(mazeInstance.ghosts[ghostNumber]);
 			MoveGhost(mazeInstance, ghostNumber, ghostValue);
 			
@@ -421,9 +421,9 @@ bool Character::checkGhostNeighbors(int rowOffset, int columnOffset,
 
 	// Check if the Cell is not a WALL, and if it was the last element on both blacks and grays Vector
 	// Also, verify the Cell is not a Ghost
-	if (temp->GetIdentity() != WALL && !gameInstance.IsGhost(temp->GetIdentity())
+	if (temp->GetIdentity() != WALL && (!gameInstance.IsGhost(temp->GetIdentity()))
 		&& gameInstance.graysIterator == gameInstance.graysVector.end() 
-		&& gameInstance.blacksIterator == gameInstance.blacksVector.end() && temp->GetIdentity() == SPACE)
+		&& gameInstance.blacksIterator == gameInstance.blacksVector.end())
 	{
 		// set neighbor Cell's parent
 		temp->SetParent(pCurr);
