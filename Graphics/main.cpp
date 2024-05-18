@@ -49,16 +49,16 @@ void menu(int choice)
 		break;
 
 	case 1:
-		if (!game->IsGhostWon() && !game->IsPacmanWon())
+		while (!game->IsGhostWon() && !game->IsPacmanWon())
 		{
 			game->PlayGame();
-			
+			display();
 		}
 		break;
 
 	case 2:
 		srand(static_cast<unsigned int>(time(0)));
-		game->PlayGame();
+		game=new Game();
 		break;
 
 	}

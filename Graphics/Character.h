@@ -10,7 +10,7 @@ using namespace		std;
 
 const double		STEP_PENALTY = 0.4;
 const double		CLOSE_DISTANCE = 1.4;
-const int			DEPTH = 5;// BFS DEPTH
+const int			DEPTH = 20;// BFS DEPTH
 class State;
 
 class Character
