@@ -44,7 +44,7 @@ void menu(int choice)
 		if (!game->IsGhostWon() && !game->IsPacmanWon())
 		{
 			game->PlayGame();
-			display();
+			
 		}
 		break;
 
@@ -52,14 +52,13 @@ void menu(int choice)
 		if (!game->IsGhostWon() && !game->IsPacmanWon())
 		{
 			game->PlayGame();
-			display();
+			
 		}
 		break;
 
 	case 2:
 		srand(static_cast<unsigned int>(time(0)));
 		game->PlayGame();
-		display();
 		break;
 
 	}

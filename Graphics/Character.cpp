@@ -53,7 +53,7 @@ bool Character::PlayPacman(Maze& gameInstance)
 	int numOfGhosts;
 	getNumOfGhosts(&numOfGhosts, gameInstance);
 	
-	gameInstance.pacmanVector.push_back(gameInstance.pacman);
+	gameInstance.pacmanQueue.push(gameInstance.pacman);
 
 	//if pacman won return true to game(no more coins to find)
 	if(CoinsRisk(gameInstance))
@@ -135,9 +135,10 @@ bool Character::PlayPacman(Maze& gameInstance)
 				isWon = true;
 	}
 	
-		gameInstance.pacmanVector.clear();
 		while(!gameInstance.safeDistancePQ.empty())
 			gameInstance.safeDistancePQ.pop();
+		while (!gameInstance.pacmanQueue.empty())
+			gameInstance.pacmanQueue.pop();
 	
 		//pacman didn't won yet
 		return isWon;
@@ -290,7 +291,7 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 	}
 		currentCell->SetIdentity(PACMAN);
 
-		gameInstance.pacman = currentCell;
+		gameInstance.pacman = new Cell(currentCell);
 		currentCell = currentCell->GetParent();
 		// "Paint" the Pacman's previous cell with SPACE
 		gameInstance.MAZE[currentCell->GetRow()][currentCell->GetColumn()]->SetIdentity(SPACE);
