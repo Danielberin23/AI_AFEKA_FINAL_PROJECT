@@ -87,7 +87,7 @@ public:
 	double	assertSafety(Maze& gameInstance, Cell* coinCell);
 	bool	CoinsRisk(Maze& gameInstance); 
 
-	void getNumOfGhosts(int* num, Maze& mazeInstance);
+	void getNumOfGhosts(int& num, Maze& mazeInstance);
 
 	int ghostsAttacking(Maze& mazeInstance);
 

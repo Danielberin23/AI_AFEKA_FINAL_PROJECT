@@ -51,7 +51,7 @@ bool Character::PlayPacman(Maze& gameInstance)
 	Cell* previousTarget = nullptr;
 	bool isWon = false;
 	int numOfGhosts;
-	getNumOfGhosts(&numOfGhosts, gameInstance);
+	getNumOfGhosts(numOfGhosts, gameInstance);
 	
 	gameInstance.pacmanQueue.push(gameInstance.pacman);
 
@@ -186,7 +186,7 @@ bool Character::PlayGhost(Maze& mazeInstance, int ghostNumber)
 		if (isAttacking)
 		{
 			// if ghost is near the pacman we first check number of ghosts
-			getNumOfGhosts(&numOfGhosts, mazeInstance);
+			getNumOfGhosts(numOfGhosts, mazeInstance);
 			if (numOfGhosts == 1)
 				return false;//pacman won
 			// check if all ghosts are in range of 1 of the ghost which attacking
@@ -224,7 +224,7 @@ int Character::ghostsAttacking(Maze& mazeInstance)
 }
 
 
-void Character::getNumOfGhosts(int* num, Maze& mazeInstance)
+void Character::getNumOfGhosts(int& num, Maze& mazeInstance)
 {
 	int temp = 0;
 	for (int i = 0; i < MSZ; i++)
@@ -236,7 +236,7 @@ void Character::getNumOfGhosts(int* num, Maze& mazeInstance)
 		}
 	}
 
-	num = &temp;
+	num = temp;
 }
 
 bool Character::MovePacman(Maze& gameInstance, Cell* target)
