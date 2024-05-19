@@ -285,7 +285,7 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 		currentCell = currentCell->GetParent();
 	}
 
-	if (this->isChasing == true)
+	if (this->isChasing)
 	{
 		if (ghostsAttacking(gameInstance) > 0 && this->Moves < PacmanFightDelay)
 		{
@@ -300,10 +300,11 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 
 		gameInstance.pacman = currentCell;
 		currentCell = currentCell->GetParent();
+		gameInstance.pacman->SetParent(nullptr);
 		// "Paint" the Pacman's previous cell with SPACE
 		gameInstance.MAZE[currentCell->GetRow()][currentCell->GetColumn()]->SetIdentity(SPACE);
 	
-	if (Distance(this->getPosition(), target)==1)
+	if (Distance(gameInstance.pacman, target)<=CLOSE_DISTANCE)
 	{
 		this->SetPacmanPoints(this->GetPacmanPoints() + 10);
 		cout << "Pacman found food and got " << this->GetPacmanPoints() * 100 << " points" << endl;
@@ -379,10 +380,19 @@ void Character::MoveGhost(Maze& gameInstance, int ghostNumber, int ghostValue)
 		// which was calculated
 	}
 	//don't move ghost if is attacking
-	if (Distance(gameInstance.pacman, temp) == 1)
+	
+	// setting identity of new cell to be the ghost[number]
+	temp->SetIdentity(ghostValue);
+	// inserting new ghost position
+	gameInstance.ghosts[ghostNumber] = temp;
+	// getting old ghost's position
+	temp = temp->GetParent();
+	gameInstance.ghosts[ghostNumber]->SetParent(nullptr);
+	// put SPACE in that old position
+	if (Distance(gameInstance.pacman, gameInstance.ghosts[ghostNumber]) <= CLOSE_DISTANCE)
 	{
 		// change from chasing to attacking
-		if(this->Moves==0)
+		if (this->Moves == 0)
 			this->GetCurrentState()->Transition(this);//change from chasing to attacking
 		this->Moves++;
 
@@ -390,13 +400,6 @@ void Character::MoveGhost(Maze& gameInstance, int ghostNumber, int ghostValue)
 		gameInstance.graysVector.clear();
 		return;
 	}
-	// setting identity of new cell to be the ghost[number]
-	temp->SetIdentity(ghostValue);
-	// inserting new ghost position
-	gameInstance.ghosts[ghostNumber] = temp;
-	// getting old ghost's position
-	temp = temp->GetParent();
-	// put SPACE in that old position
 	gameInstance.MAZE[temp->GetRow()][temp->GetColumn()]->SetIdentity(SPACE);
 	//clear vectors
 	gameInstance.blacksVector.clear();

@@ -48,7 +48,7 @@ public:
 	void DrawMaze();
 	// Functions
 	void	PlayGame();
-	void	Play(Character* character);
+	void	Play(Character* character,int ghostPlayed);
 	
 
 };

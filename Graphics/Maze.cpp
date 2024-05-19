@@ -116,7 +116,7 @@ void Maze::AddGhosts()
 			MAZE[i][j]->SetIdentity(GHOST_2);
 		else if (k == 2)
 			MAZE[i][j]->SetIdentity(GHOST_3);
-		ghosts[k]=new Cell(MAZE[i][j]);
+		ghosts[k]=MAZE[i][j];
 	}
 }
 int Maze::numOfSpaces()
@@ -249,4 +249,12 @@ bool Maze::IsGhost(int ghostValue)
 	if (ghostValue == GHOST_1 || ghostValue == GHOST_2 || ghostValue == GHOST_3)
 		return true;
 	return false;
+}
+
+void Maze::cleanParents()
+{
+	int i, j;
+	for (i = 0; i < MSZ; i++)
+		for (j = 0; j < MSZ; j++)
+			MAZE[i][j]->SetParent(nullptr);
 }

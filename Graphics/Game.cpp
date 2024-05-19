@@ -24,10 +24,10 @@ void Game::PlayGame()
 	if (!ghostsWon && !pacmanWon)
 	{
 		for (k = 0; k < NUM_OF_GHOSTS && (!ghostsWon && !pacmanWon); k++)
-			 Play(Ghosts[k]);
+			 Play(Ghosts[k],k);
 
 		if (!ghostsWon && !pacmanWon)
-			 Play(Pacman);
+			 Play(Pacman,-1);
 	}
 
 }
@@ -36,12 +36,11 @@ void Game::DrawMaze()
 	BoardInstance->DrawMaze();
 }
 
-void Game::Play(Character* character)
+void Game::Play(Character* character,int ghostPlayed)
 {
-	if (character->GetIsPacman())
+	if (character->GetIsPacman() && ghostPlayed == -1)
 		this->pacmanWon = Pacman->PlayPacman(*BoardInstance);
 	else
-		for (int i = 0; i < NUM_OF_GHOSTS; i++)
-			this->ghostsWon = Ghosts[i]->PlayGhost(*BoardInstance, i);
-		
+		this->ghostsWon = Ghosts[ghostPlayed]->PlayGhost(*BoardInstance, ghostPlayed);
+	BoardInstance->cleanParents();
 }

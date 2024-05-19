@@ -54,5 +54,5 @@ public:
 
     bool			IsFairGame() { return fairGame; }
     void SetFairGame(bool flag) { this->fairGame = flag; }
-  
+    void cleanParents();
 };
