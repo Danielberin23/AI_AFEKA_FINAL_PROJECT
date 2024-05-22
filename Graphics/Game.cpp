@@ -29,7 +29,11 @@ void Game::PlayGame()
 		if (!ghostsWon && !pacmanWon)
 			 Play(Pacman,-1);
 	}
-
+	else
+		if(ghostsWon)
+			cout << "Ghosts Won!" << endl;
+		else
+			cout << "Pacman Won!" << endl;
 }
 void Game::DrawMaze()
 {

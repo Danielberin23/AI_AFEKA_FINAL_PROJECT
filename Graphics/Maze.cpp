@@ -116,7 +116,7 @@ void Maze::AddGhosts()
 			MAZE[i][j]->SetIdentity(GHOST_2);
 		else if (k == 2)
 			MAZE[i][j]->SetIdentity(GHOST_3);
-		ghosts[k]=MAZE[i][j];
+		ghosts[k]=new Cell(MAZE[i][j]);
 	}
 }
 int Maze::numOfSpaces()
@@ -256,5 +256,10 @@ void Maze::cleanParents()
 	int i, j;
 	for (i = 0; i < MSZ; i++)
 		for (j = 0; j < MSZ; j++)
+		{
 			MAZE[i][j]->SetParent(nullptr);
+			MAZE[i][j]->SetG(0);
+			MAZE[i][j]->SetH(0);
+			MAZE[i][j]->SetF();	
+		}
 }

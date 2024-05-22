@@ -47,7 +47,7 @@ double Character::Distance(Cell* n1, Cell* n2)
 
 bool Character::PlayPacman(Maze& gameInstance)
 {
-	Cell* pacmanTarget;
+	Cell* pacmanTarget=nullptr;
 	Cell* previousTarget = nullptr;
 	bool isWon = false;
 	int numOfGhosts;
@@ -56,28 +56,25 @@ bool Character::PlayPacman(Maze& gameInstance)
 	gameInstance.pacmanQueue.push(gameInstance.pacman);
 
 	//if pacman won return true to game(no more coins to find)
+
+	
 	if(CoinsRisk(gameInstance))
 		return true;
-	pacmanTarget = gameInstance.safeDistancePQ.top();
+	if (Iterator == 0) { 
+		pacmanTarget = gameInstance.safeDistancePQ.top(); 
+		this->SetTarget(pacmanTarget);
+		Iterator++;
+	}
 	//if Pacman is moving, target is food, change the target to the safest one
 	if (isMoving)
 	{
-		if (previousTarget != nullptr)
-		{
-			if (pacmanTarget->GetSafeDistance() < previousTarget->GetSafeDistance())
+			isWon = MovePacman(gameInstance, this->getTarget());
+			if (Distance(gameInstance.pacman, this->getTarget()) <= CLOSE_DISTANCE)
 			{
-				this->SetTarget(previousTarget);
-				isWon=MovePacman(gameInstance, this->getTarget());
+				Iterator = 0;
 			}
-		}
-		else
-		{
-			this->SetTarget(pacmanTarget);
-			isWon=MovePacman(gameInstance, this->getTarget());
-		}
-		previousTarget = pacmanTarget;
+		
 	}
-
 	else if (isChasing)
 	{
 
@@ -114,8 +111,8 @@ bool Character::PlayPacman(Maze& gameInstance)
 	}
 	else if (isAttacking)
 	{
-			if (ghostsAttacking(gameInstance) > 1)
-				return isWon;
+		if (ghostsAttacking(gameInstance) > 1)
+			return false;
 			if (this->Moves < PacmanFightDelay)
 			{
 				this->Moves++;
@@ -128,11 +125,11 @@ bool Character::PlayPacman(Maze& gameInstance)
 				//put position to -MSZ,-MSZ (out of bounds from maze)
 				temp->SetRow(-MSZ);
 				temp->SetColumn(-MSZ);
-				this->GetCurrentState()->Transition(this);
+				this->GetCurrentState()->Transition(this);// moves to eating
 				this->Moves = 0;
 			}
 			if (numOfGhosts == 1)
-				isWon = true;
+				return true;
 	}
 	
 		while(!gameInstance.safeDistancePQ.empty())
@@ -167,7 +164,6 @@ bool Character::PlayGhost(Maze& mazeInstance, int ghostNumber)
 		{
 			//move to attack mode 
 			this->GetCurrentState()->Transition(this); 
-			MoveGhost(mazeInstance, ghostNumber, ghostValue);
 		}
 		
 		// else change position of the ghost 
@@ -181,9 +177,7 @@ bool Character::PlayGhost(Maze& mazeInstance, int ghostNumber)
 	}
 
 	// in Attack state
-	else
-	{
-		if (isAttacking)
+	if (isAttacking)
 		{
 			// if ghost is near the pacman we first check number of ghosts
 			getNumOfGhosts(numOfGhosts, mazeInstance);
@@ -198,10 +192,10 @@ bool Character::PlayGhost(Maze& mazeInstance, int ghostNumber)
 				return true;//ghosts won
 			}
 			else
+
 				return false;
 		}
-	}
-
+	
 	while (!mazeInstance.ghostsPQ.empty())
 		mazeInstance.ghostsPQ.pop();
 	return false;
@@ -245,6 +239,10 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 	int row, column;
 	bool go_on = true;
 	int currentDepth = 0;
+
+	gameInstance.blacksVector.clear();
+	gameInstance.graysVector.clear();
+
 	while (!gameInstance.pacmanQueue.empty()  && currentDepth<=DEPTH)
 	{
 		currentCell = gameInstance.pacmanQueue.front();
@@ -278,8 +276,6 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 	////restore path
 	while (currentCell!=nullptr)
 	{
-
-		
 		if (currentCell->GetParent()->GetIdentity() == PACMAN)
 			break;
 		currentCell = currentCell->GetParent();
@@ -289,16 +285,14 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 	{
 		if (ghostsAttacking(gameInstance) > 0 && this->Moves < PacmanFightDelay)
 		{
-			this->GetCurrentState()->Transition(this);
-			gameInstance.blacksVector.clear();
-			gameInstance.graysVector.clear();
-			return false;//ghost won, they will return true if won but we stop the loop
+			this->GetCurrentState()->Transition(this);//transition to attack
+			return false;
 		}
 
 	}
 		currentCell->SetIdentity(PACMAN);
 
-		gameInstance.pacman = currentCell;
+		gameInstance.pacman =new  Cell(currentCell);
 		currentCell = currentCell->GetParent();
 		gameInstance.pacman->SetParent(nullptr);
 		// "Paint" the Pacman's previous cell with SPACE
@@ -306,23 +300,20 @@ bool Character::MovePacman(Maze& gameInstance, Cell* target)
 	
 	if (Distance(gameInstance.pacman, target)<=CLOSE_DISTANCE)
 	{
-		this->SetPacmanPoints(this->GetPacmanPoints() + 10);
+		this->SetPacmanPoints(this->GetPacmanPoints() + 1);
 		cout << "Pacman found food and got " << this->GetPacmanPoints() * 100 << " points" << endl;
 		if (pacmanPoints == NUM_OF_FOOD)
 		{
-			gameInstance.blacksVector.clear();
-			gameInstance.graysVector.clear();
+			
 			return true;
 		}
-		else
+		else 
 		{
-			gameInstance.blacksVector.clear();
-			gameInstance.graysVector.clear();
+			
 			return false;
 		}
 	}
-	gameInstance.blacksVector.clear();
-	gameInstance.graysVector.clear();
+	
 	return false;
 }
 
@@ -331,7 +322,9 @@ void Character::MoveGhost(Maze& gameInstance, int ghostNumber, int ghostValue)
 {
 	Cell* temp = nullptr;
 	int row, column;
-	
+
+	gameInstance.blacksVector.clear();
+	gameInstance.graysVector.clear();
 	// A*
 	while (!(gameInstance).ghostsPQ.empty())
 	{
@@ -361,17 +354,17 @@ void Character::MoveGhost(Maze& gameInstance, int ghostNumber, int ghostValue)
 		// up
 		checkGhostNeighbors(0, -1, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
 		// down
-		checkGhostNeighbors(0,  1, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
+		checkGhostNeighbors(0, 1, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
 		//left
 		checkGhostNeighbors(-1, 0, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
 		// right
-		checkGhostNeighbors(1,  0, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
+		checkGhostNeighbors(1, 0, temp, ghostNumber, ghostValue, gameInstance, PACMAN);
 	}
 
 	// Restore the best path found and get the next cell to move to
 	while (temp != nullptr)
 	{
-		
+
 		if (temp->GetParent()->GetIdentity() == ghostValue)
 			break;
 		temp = temp->GetParent();
@@ -380,30 +373,22 @@ void Character::MoveGhost(Maze& gameInstance, int ghostNumber, int ghostValue)
 		// which was calculated
 	}
 	//don't move ghost if is attacking
-	
+
 	// setting identity of new cell to be the ghost[number]
 	temp->SetIdentity(ghostValue);
 	// inserting new ghost position
-	gameInstance.ghosts[ghostNumber] = temp;
+	gameInstance.ghosts[ghostNumber] = new Cell(temp);
 	// getting old ghost's position
 	temp = temp->GetParent();
 	gameInstance.ghosts[ghostNumber]->SetParent(nullptr);
 	// put SPACE in that old position
 	if (Distance(gameInstance.pacman, gameInstance.ghosts[ghostNumber]) <= CLOSE_DISTANCE)
 	{
-		// change from chasing to attacking
-		if (this->Moves == 0)
-			this->GetCurrentState()->Transition(this);//change from chasing to attacking
-		this->Moves++;
-
-		gameInstance.blacksVector.clear();
-		gameInstance.graysVector.clear();
-		return;
+		this->GetCurrentState()->Transition(this);//change from chasing to attacking
+		
 	}
 	gameInstance.MAZE[temp->GetRow()][temp->GetColumn()]->SetIdentity(SPACE);
-	//clear vectors
-	gameInstance.blacksVector.clear();
-	gameInstance.graysVector.clear();
+
 }
 
 // A function to check Ghost's neighbor cells

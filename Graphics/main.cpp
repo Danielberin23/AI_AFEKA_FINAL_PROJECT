@@ -44,7 +44,7 @@ void menu(int choice)
 		if (!game->IsGhostWon() && !game->IsPacmanWon())
 		{
 			game->PlayGame();
-			
+			display();
 		}
 		break;
 

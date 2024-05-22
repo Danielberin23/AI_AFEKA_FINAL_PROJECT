@@ -10,7 +10,7 @@ using namespace		std;
 
 const double		STEP_PENALTY = 0.4;
 const double		CLOSE_DISTANCE = 1.4;
-const int			DEPTH = 20;// BFS DEPTH
+const int			DEPTH = MSZ;// BFS DEPTH
 class State;
 
 class Character
@@ -23,8 +23,8 @@ private:
 	int pacmanPoints = 0;
 	bool safeDistance = true;
 	bool IsPacman;
-	int Moves = 0;
-
+	int Moves = 0;//moves for pacman to finish of ghosts
+	int Iterator = 0;//for Coins finding
 	// bool states
 	bool isMoving;
 	bool isChasing;
